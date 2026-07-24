@@ -57,8 +57,8 @@
 			</view>
 		</view>
 
-		<!-- ===== 底部输入栏（固定，录音时隐藏） ===== -->
-		<view v-if="!isRecording" class="ai-input-bar">
+		<!-- ===== 底部输入栏（固定；录音时仅视觉隐藏，保留触摸节点） ===== -->
+		<view class="ai-input-bar" :class="{ 'ai-input-bar-hidden': isRecording }">
 			<!-- 语音按钮（文字模式）/ 键盘按钮（语音模式） -->
 			<view class="ai-input-voice" @click="onToggleVoiceMode">
 				<view class="ai-voice-circle" />
@@ -80,14 +80,13 @@
 				:adjust-position="false"
 				@confirm="onSend"
 			/>
-			<!-- 语音模式：「按住说话」按钮 -->
+			<!-- 语音模式：「按住说话」按钮（触摸逻辑保持原实现） -->
 			<view
 				v-else
 				class="ai-hold-btn"
 				@touchstart="onVoiceTouchStart"
 				@touchmove="onVoiceTouchMove"
 				@touchend="onVoiceTouchEnd"
-				@touchcancel="onVoiceTouchEnd"
 			>
 				<text class="ai-hold-btn-text">{{ $t('ai.holdToSpeak') }}</text>
 			</view>
@@ -97,14 +96,11 @@
 			</view>
 		</view>
 
-		<!-- ===== 录音底部提示层（设计稿：底部渐变 + 波形） ===== -->
+		<!-- ===== 录音浮动提示层（仅样式层，不拦截触摸） ===== -->
 		<view
 			v-if="isRecording"
 			class="ai-record-overlay"
 			:class="{ 'ai-record-cancel': recordState === 'cancel' }"
-			@touchmove="onVoiceTouchMove"
-			@touchend="onVoiceTouchEnd"
-			@touchcancel="onVoiceTouchEnd"
 		>
 			<view class="ai-record-panel">
 				<!-- 提示文案在上 -->
@@ -538,6 +534,11 @@ $record-red-bg: rgba(255, 196, 186, 0.55);
 	z-index: 10;
 }
 
+/* 录音中仅隐藏外观，节点保留以确保 touchmove/touchend 不中断 */
+.ai-input-bar-hidden {
+	opacity: 0;
+}
+
 /* 语音按钮：40x40 圆底 + 麦克风图标 */
 .ai-input-voice {
 	position: relative;
@@ -624,7 +625,7 @@ $record-red-bg: rgba(255, 196, 186, 0.55);
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 100;
+	z-index: 9; /* 低于输入栏，避免截获按住说话的触摸事件 */
 	width: 750rpx;
 	height: 360rpx; /* 底部录音区域高度 */
 	display: flex;
@@ -641,7 +642,7 @@ $record-red-bg: rgba(255, 196, 186, 0.55);
 	);
 	padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
-	pointer-events: auto;
+	pointer-events: none; /* 纯展示层，触摸继续落在 hold 按钮上 */
 	transition: background 0.2s ease;
 }
 

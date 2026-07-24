@@ -625,7 +625,7 @@ $record-red-bg: rgba(255, 196, 186, 0.55);
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 9; /* 低于输入栏，避免截获按住说话的触摸事件 */
+	z-index: 100; /* 视觉盖在输入栏之上；pointer-events:none 不截获触摸 */
 	width: 750rpx;
 	height: 360rpx; /* 底部录音区域高度 */
 	display: flex;
